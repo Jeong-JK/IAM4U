@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MatchMinds - 소개팅 앱</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts (선택 사항) -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet" />
+
+    <style>
+      body {
+        font-family: 'Helvetica Neue', 'Segoe UI', sans-serif;
+      }
+      h1 {
+        font-family: 'Dancing Script', cursive;
+      }
+    </style>
+  </head>
+  <body class="bg-pink-50 text-gray-800 min-h-screen">
+    
+    <!-- 네비게이션 바 -->
+    <nav class="bg-white shadow-md px-6 py-4 flex justify-between items-center">
+      <h1 class="text-3xl font-bold text-pink-500">MatchMinds</h1>
+      <div class="flex gap-4">
+        <a href="#" class="text-pink-600 hover:underline">홈</a>
+        <a href="#" class="text-pink-600 hover:underline">내 프로필</a>
+        <a href="#" class="text-pink-600 hover:underline">매칭</a>
+      </div>
+    </nav>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="p-6">
+      <section class="max-w-4xl mx-auto">
+        <h2 class="text-2xl font-bold text-pink-600 mb-6">오늘의 추천 프로필</h2>
+
+        <!-- 프로필 카드 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition">
+            <img src="C:\image/unnamed.png" alt="profile" class="rounded-xl w-full h-64 object-cover mb-4" />
+            <h3 class="text-xl font-bold text-pink-600">민지, 28</h3>
+            <p class="text-sm text-gray-600">서울 • 커피 좋아해요 ☕</p>
+            <div class="mt-4 flex gap-2">
+              <button class="bg-gray-200 text-gray-700 px-4 py-1 rounded-full">패스</button>
+              <button class="bg-pink-500 text-white px-4 py-1 rounded-full">좋아요 💕</button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition">
+            <img src="C:\image/Jihun.jpg" alt="profile" class="rounded-xl w-full h-64 object-cover mb-4" />
+            <h3 class="text-xl font-bold text-pink-600">지훈, 31</h3>
+            <p class="text-sm text-gray-600">인천 • 등산 좋아해요 🏔️</p>
+            <div class="mt-4 flex gap-2">
+              <button class="bg-gray-200 text-gray-700 px-4 py-1 rounded-full">패스</button>
+              <button class="bg-pink-500 text-white px-4 py-1 rounded-full">좋아요 💕</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    
+  </body>
+</html>

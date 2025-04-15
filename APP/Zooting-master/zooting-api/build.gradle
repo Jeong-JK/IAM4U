@@ -1,0 +1,120 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.1'
+    id 'io.spring.dependency-management' version '1.1.4'
+    //restdoc - asciidoctor
+    id 'org.asciidoctor.jvm.convert' version '3.3.2'
+}
+
+group = 'com.zooting'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '17'
+}
+ext {
+    snippetsDir = file('./build/generated-snippets')
+}
+test {
+    useJUnitPlatform()
+    outputs.dir snippetsDir
+}
+
+configurations {
+    asciidoctorExt
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    // jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
+    implementation 'io.openvidu:openvidu-java-client:2.29.0'
+    // redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    // validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // jpa
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // jdbc
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    // websocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    // mysql-connector
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    // lombok
+    compileOnly 'org.projectlombok:lombok'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    annotationProcessor 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testCompileOnly 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompileOnly 'org.projectlombok:lombok'
+    // modelmapper: https://mvnrepository.com/artifact/org.modelmapper/modelmapper
+    implementation 'org.modelmapper:modelmapper:3.2.0'
+    // easy-random: https://mvnrepository.com/artifact/org.jeasy/easy-random-core
+    testImplementation 'org.jeasy:easy-random-core:5.0.0'
+    // json jackson
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.14.2'
+    // swagger - springdoc
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+    implementation 'org.springdoc:springdoc-openapi-starter-common:2.0.2'
+    implementation 'org.springdoc:springdoc-openapi-ui:1.6.15'
+    // https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation 'com.google.code.gson:gson:2.10.1'
+    // querydsl
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+    // aws s3
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+    implementation 'net.coobird:thumbnailator:0.4.8'
+    // mockito - restdoc
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    // jackson 날짜 시간설정
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+}
+
+asciidoctor {
+    inputs.dir snippetsDir
+    // asciidoctor task 를 실행할 때, test task 를 먼저 실행한다.
+    dependsOn test
+}
+asciidoctor.doFirst {
+    delete file('src/main/resources/static/docs')
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+task copyDocument(type: Copy) {
+    dependsOn asciidoctor
+    from file("build/docs/asciidoc")
+    into file("src/main/resources/static/docs")
+}
+build {
+    dependsOn copyDocument
+}
+

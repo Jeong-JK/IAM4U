@@ -1,0 +1,137 @@
+[팀프로젝트 초안]
+
+
+팀명 : IAM4U
+
+
+팀 구성: 김종명, 오세빈, 이용민, 정재근, 조건호
+
+
+팀장: 오세빈
+
+
+주제: 멀티클라우드 기반 Terraform을 활용한 EKS 인프라 및 실시간 데이팅 어플리케이션 플랫폼 자동화 구현
+
+
+앱명 : MatchMinds
+
+
+시나리오:
+고객사는 전국 대학 이벤트 중심 데이팅 플랫폼 'MatchMinds'(가명)를 운영 중이다.
+지난 이벤트에서 10초만에 5,000명 접속하여 기존 서버가 마비되었고 어플리케이션 내 매칭 로직도 느리고, 채팅방 연결 실패도 자주 발생하였다. 관리자도 접속 상태/성비/매칭률 등의 데이터 정보를 실시간으로 확인할 수 없어 불편을 호소하였다. 그래서 고객사는 이번엔 AWS 기반 확장형 시스템으로 확실히 만들고 싶다 요청하였다.
+
+
+고객이 우려하는 장애 상황 및 요구사항:
+1. 고성능 매칭 엔진 구축 - 트래픽 증가 시 서버 다운 방지를 위해 사용자 수 증가에도 빠르고 안정적으로 매칭 수행
+
+2. 안정적인 실시간 채팅 인프라 - 매칭 로직 응답 지연 및 채팅방 연결 실패 방지를 위해 WebSocket 기반이든 Kinesis 기반이든, 끊김 없이 연결 유지 및 복구
+
+3. 실시간 대시보드 제공 - 관리자 페이지의 데이터 실시간성 부족 방지를 위해 매칭 성공률, 성비, 현재 접속자 수, 지역별 트래픽 등 모니터링 가능
+
+4. 장애 대응 자동화 및 알림 - 데이터 유실 or 불일치 방지를 위해 이상 징후 발생 시 관리자에게 실시간 알림 제공 (예: CloudWatch, SNS)
+
+5. 확장성과 유연한 아키텍처 - 향후 글로벌 확장 또는 기능 추가에 유연하게 대응 가능한 구조
+
+6. 비용 최적화 - 사용량 기반 자동 확장 및 서버리스/컨테이너 사용 등으로 운영비 절감
+
+
+선택한 서비스와 AWS 리소스:
+Kinesis
+S3 + CloudFront
+Cognito
+API Gateway → EKS
+Redis + SQS + EventBridge
+EKS + ECR
+Azure SignalR
+S3 + Azure Content Moderator
+Aurora Serverless / DynamoDB
+GitHub Actions + Terraform
+CloudWatch, Grafana, Slack
+
+
+각 팀원 역할:
+
+오세빈
+총괄 기획 및 프론트엔드/아키텍처 설계
+- 전체 아키텍처 구조 설계 및 역할 조율
+- React SPA 구조 + S3/CloudFront 배포
+- Cognito 로그인 연동
+- Route 53 구현 (도메인/HTTPS 연결)
+- 채팅방 UI 및 라우팅 구성
+- WebSocket 설계 흐름 관리 (SignalR 포함)
+- 프론트 → 백엔드 → 채팅 연동 흐름 설계
+
+정재근
+백엔드 API / 랜덤 매칭 로직 담당 (EKS 내 컨테이너화)
+- EKS 클러스터 내 매칭 서비스 컨테이너 배포
+- Redis 대기열 기반 매칭 알고리즘 구현
+- SQS, EventBridge 기반 비동기 처리
+- API Gateway와 연결된 백엔드 서비스 라우팅
+- Lambda 매칭 로직 구현
+- Aurora 저장 테스트 (매칭 기록)
+
+조건호
+EKS 클러스터 운영 및 배포 자동화 / CI-CD 담당
+- EKS 클러스터 설계 및 노드 구성
+- GitHub Actions → ECR → EKS 자동 배포 구성
+- ECR 생성 + 샘플 컨테이너 배포
+- Slack과 Grafana 알림 파이프라인 구성
+
+이용민
+인증 / DB / 인프라 초기 구성 담당
+- Cognito 사용자풀 구성 및 OAuth 연결
+- Aurora Serverless(DB) + DynamoDB(NoSQL) 테이블 설계
+- Terraform으로 VPC, RDS, IAM 등 인프라 IaC 관리 (S3 backend + DynamoDB lock)
+- JWT 인증 흐름 검증 및 보안 강화 설계
+- Route 53 도메인 + 인증서 발급
+
+김종명
+실시간 채팅 / 이미지 처리 / Azure 서비스 연동 담당
+- Azure SignalR 기반 채팅 서버 구성
+- CloudWatch Logs 구성 및 로그 수집 흐름 설계
+- 서비스별 로그 통합 → DynamoDB or S3 저장 (사용자 이미지 → S3 업로드 → Content Moderator 검수)
+- Grafana 대시보드 생성
+- 채팅 메시지 WebSocket 통신 처리
+- 프론트와 SignalR 연결 구조 테스트
+
+
+프로젝트 단계별 흐름
+[0단계] 공통 준비
+
+- AWS 계정 생성 (1개)
+- 팀원 IAM 사용자 생성 및 권한 부여
+- 비용 초과 방지용 청구 알림 설정
+
+[1단계] 이용민 시작 – 인프라 기본 구축
+
+- Terraform 초기 세팅 (S3 backend + DynamoDB lock)
+- VPC, Subnet, SG, IAM Role 생성
+- Aurora Serverless / DynamoDB 생성
+- Route 53 도메인 + 인증서 발급
+
+[2단계] 조건호 시작 – EKS 클러스터 구성
+
+- EKS 클러스터 생성 및 노드 그룹 구성
+- ECR 생성 + 샘플 컨테이너 배포
+- GitHub Actions → ECR → EKS 배포 자동화 구성
+
+ [3단계] 정재근 시작 – 매칭 API 로직 개발
+
+- Lambda 매칭 로직 구현
+- Redis 대기열 처리
+- SQS/이벤트 트리거 테스트
+- Aurora 저장 테스트 (매칭 기록)
+
+[4단계] 오세빈 시작 – 프론트 SPA 설계
+
+- React SPA UI 설계 및 구성
+- S3 + CloudFront 배포 테스트
+- Cognito 로그인 연동
+- 채팅방 UI 및 라우팅 구성
+
+[5단계] 김종명 시작 – 로그 수집 + 채팅 시스템 구축
+
+- CloudWatch Logs 구성 및 로그 수집 흐름 설계
+- 서비스별 로그 통합 → DynamoDB or S3 저장
+- Grafana 대시보드 생성
+- SignalR 기반 채팅 통신 구성
