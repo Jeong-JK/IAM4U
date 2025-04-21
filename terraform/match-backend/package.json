@@ -3,7 +3,8 @@
     "version": "1.0.0",
     "main": "app.js",
     "scripts": {
-      "start": "node app.js"
+      "start": "node app.js",
+      "test": "echo \"✅ 테스트 스텝 통과 (아직 테스트 없음)\" && exit 0"
     },
     "dependencies": {
       "http": "0.0.1-security"
