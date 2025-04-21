@@ -2,7 +2,7 @@
 const http = require('http');
 
 const server = http.createServer((req, res) => {
-  res.writeHead(200);
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
   res.end('✅ 배포 성공! EKS에서 잘 동작 중입니다.');
 });
 
