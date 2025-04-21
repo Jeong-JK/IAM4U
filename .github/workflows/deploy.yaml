@@ -36,3 +36,4 @@ jobs:
       run: |
         aws eks update-kubeconfig --region ap-northeast-2 --name match-cluster
         kubectl rollout restart deployment match-backend
+
