@@ -5,7 +5,7 @@ on:
     paths:
       - 'terraform/match-backend/**'
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
