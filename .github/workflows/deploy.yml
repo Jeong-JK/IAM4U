@@ -21,37 +21,48 @@ jobs:
       IMAGE_TAG: latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout source
       uses: actions/checkout@v3
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    - name: Configure AWS credentials via OIDC
+    - name: Configure AWS credentials (OIDC)
       uses: aws-actions/configure-aws-credentials@v2
       with:
         role-to-assume: arn:aws:iam::113701560990:role/GitHubActions-EKS-DeployRole
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Login to Amazon ECR
+    - name: Log in to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build and Push Docker Image
+    - name: Build and push Docker image to ECR
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG terraform/match-backend
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-    - name: Install kubectl and jq
+    - name: Install dependencies
       run: |
-        sudo apt-get update && sudo apt-get install -y jq
+        sudo apt-get update && sudo apt-get install -y curl unzip jq
+        curl -LO "https://dl.k8s.io/release/v1.32.2/bin/linux/amd64/kubectl"
+        chmod +x kubectl && sudo mv kubectl /usr/local/bin/
 
-    - name: Configure kubeconfig manually
+    - name: Generate EKS token and apply manifests
+      env:
+        K8S_DEPLOY_PATH: terraform/match-backend/k8s
       run: |
-        mkdir -p ~/.kube
-        aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+        ENDPOINT=$(aws eks describe-cluster --region $AWS_REGION --name $CLUSTER_NAME --query "cluster.endpoint" --output text)
+        CERT=$(aws eks describe-cluster --region $AWS_REGION --name $CLUSTER_NAME --query "cluster.certificateAuthority.data" --output text)
+        TOKEN=$(aws eks get-token --region $AWS_REGION --cluster-name $CLUSTER_NAME | jq -r '.status.token')
 
-    - name: Deploy to EKS using token manually
-      run: |
-        TOKEN=$(aws eks get-token --cluster-name $CLUSTER_NAME --region $AWS_REGION --output json | jq -r '.status.token')
-        kubectl --token="$TOKEN" apply -f terraform/match-backend/k8s/deployment.yaml
-        kubectl --token="$TOKEN" apply -f terraform/match-backend/k8s/service.yaml
+        echo "$CERT" | base64 -d > ca.crt
+
+        kubectl --server=$ENDPOINT \
+          --certificate-authority=ca.crt \
+          --token=$TOKEN \
+          apply -f $K8S_DEPLOY_PATH/deployment.yaml
+
+        kubectl --server=$ENDPOINT \
+          --certificate-authority=ca.crt \
+          --token=$TOKEN \
+          apply -f $K8S_DEPLOY_PATH/service.yaml
