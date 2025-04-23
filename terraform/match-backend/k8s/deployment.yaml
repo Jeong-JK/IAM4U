@@ -5,7 +5,7 @@ metadata:
   labels:
     app: match-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: match-app
@@ -16,6 +16,7 @@ spec:
     spec:
       containers:
       - name: match-app
-        image: 113701560990.dkr.ecr.ap-northeast-2.amazonaws.com/match-app:latest  # ✅ 이 부분!
+        image: 113701560990.dkr.ecr.ap-northeast-2.amazonaws.com/match-app:latest
         ports:
-        - containerPort: 80
+        - containerPort: 80        # ✅ 여기 수정
+        imagePullPolicy: Always
