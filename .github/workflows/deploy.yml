@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      AWS_REGION: ap-northeast-2
+      CLUSTER_NAME: team-project-cluster
       ECR_REGISTRY: 113701560990.dkr.ecr.ap-northeast-2.amazonaws.com
       ECR_REPOSITORY: match-app
       IMAGE_TAG: latest
@@ -25,29 +27,31 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
 
-    - name: Configure AWS credentials
+    - name: Configure AWS credentials via OIDC
       uses: aws-actions/configure-aws-credentials@v2
       with:
         role-to-assume: arn:aws:iam::113701560990:role/GitHubActions-EKS-DeployRole
-        aws-region: ap-northeast-2
+        aws-region: ${{ env.AWS_REGION }}
 
-    - name: Log in to Amazon ECR
+    - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build, tag, and push Docker image to ECR
+    - name: Build and Push Docker Image
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG terraform/match-backend
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-    - name: Update kubeconfig for EKS
-      run: aws eks update-kubeconfig --region ap-northeast-2 --name team-project-cluster
-
-    - name: Set up kubectl
-      uses: azure/setup-kubectl@v3
-      with:
-        version: v1.32.2
-
-    - name: Deploy to EKS
+    - name: Install kubectl and jq
       run: |
-        kubectl apply --validate=false -f terraform/match-backend/k8s/deployment.yaml
-        kubectl apply --validate=false -f terraform/match-backend/k8s/service.yaml
+        sudo apt-get update && sudo apt-get install -y jq
+
+    - name: Configure kubeconfig manually
+      run: |
+        mkdir -p ~/.kube
+        aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+
+    - name: Deploy to EKS using token manually
+      run: |
+        TOKEN=$(aws eks get-token --cluster-name $CLUSTER_NAME --region $AWS_REGION --output json | jq -r '.status.token')
+        kubectl --token="$TOKEN" apply -f terraform/match-backend/k8s/deployment.yaml
+        kubectl --token="$TOKEN" apply -f terraform/match-backend/k8s/service.yaml
