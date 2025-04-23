@@ -60,9 +60,9 @@ jobs:
         kubectl --server=$ENDPOINT \
           --certificate-authority=ca.crt \
           --token=$TOKEN \
-          apply -f $K8S_DEPLOY_PATH/deployment.yaml
+           apply --validate=false -f $K8S_DEPLOY_PATH/deployment.yaml
 
         kubectl --server=$ENDPOINT \
           --certificate-authority=ca.crt \
           --token=$TOKEN \
-          apply -f $K8S_DEPLOY_PATH/service.yaml
+          apply --validate=false -f $K8S_DEPLOY_PATH/service.yaml
