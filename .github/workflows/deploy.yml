@@ -1,28 +1,24 @@
-name: Deploy to EKS
+name: CI - Build and Push to ECR
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  deploy:
+  build-and-push:
     runs-on: ubuntu-latest
-
     env:
       AWS_REGION: ap-northeast-2
-      CLUSTER_NAME: team-project-cluster
       ECR_REGISTRY: 113701560990.dkr.ecr.ap-northeast-2.amazonaws.com
       ECR_REPOSITORY: match-app
       IMAGE_TAG: latest
 
     steps:
-    - name: Checkout source
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
@@ -36,33 +32,7 @@ jobs:
     - name: Log in to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Build and push Docker image to ECR
+    - name: Build and Push Docker Image
       run: |
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG terraform/match-backend
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get update && sudo apt-get install -y curl unzip jq
-        curl -LO "https://dl.k8s.io/release/v1.32.2/bin/linux/amd64/kubectl"
-        chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-
-    - name: Generate EKS token and apply manifests
-      env:
-        K8S_DEPLOY_PATH: terraform/match-backend/k8s
-      run: |
-        ENDPOINT=$(aws eks describe-cluster --region $AWS_REGION --name $CLUSTER_NAME --query "cluster.endpoint" --output text)
-        CERT=$(aws eks describe-cluster --region $AWS_REGION --name $CLUSTER_NAME --query "cluster.certificateAuthority.data" --output text)
-        TOKEN=$(aws eks get-token --region $AWS_REGION --cluster-name $CLUSTER_NAME | jq -r '.status.token')
-
-        echo "$CERT" | base64 -d > ca.crt
-
-        kubectl --server=$ENDPOINT \
-          --certificate-authority=ca.crt \
-          --token=$TOKEN \
-           apply --validate=false -f $K8S_DEPLOY_PATH/deployment.yaml
-
-        kubectl --server=$ENDPOINT \
-          --certificate-authority=ca.crt \
-          --token=$TOKEN \
-          apply --validate=false -f $K8S_DEPLOY_PATH/service.yaml
