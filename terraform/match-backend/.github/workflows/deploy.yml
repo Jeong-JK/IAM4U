@@ -36,12 +36,15 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ap-northeast-2
 
+    - name: Update kubeconfig for EKS
+      run: aws eks update-kubeconfig --region ap-northeast-2 --name team-project-cluster
+
     - name: Set up kubectl
       uses: azure/setup-kubectl@v3
       with:
         version: v1.32.2
 
-    - name: Update Kubernetes deployment
+    - name: Deploy to EKS
       run: |
         kubectl apply -f k8s/deployment.yaml
         kubectl apply -f k8s/service.yaml
