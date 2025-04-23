@@ -1,0 +1,78 @@
+@import '../../utility/scss/variables';
+@import '../../utility/scss/mixin';
+
+.signupForm {
+  height: 92%;
+  overflow: hidden;
+  overflow-y: scroll;
+  padding: 0 0 20px 0;
+  text-align: left;
+  background: linear-gradient(10deg, #f4eba0 43%, #c0faca 43%);
+
+  form {
+    padding-top: 20px;
+  }
+
+  input,
+  select {
+    font-size: 16px;
+    height: 40px;
+    margin: 0 auto 10px;
+  }
+
+  h2 {
+    font-family: 'Black Han Sans', sans-serif;
+    padding: 35px 0 25px;
+    font-size: 40px;
+    text-align: center;
+    color: $blue;
+    @include text-shadow($darkblue, $red);
+  }
+
+  label,
+  title {
+    font-weight: bold;
+  }
+
+  label,
+  p {
+    display: block;
+    padding: 0 5%;
+    line-height: 30px;
+    color: #2f3e9c;
+  }
+
+  .error {
+    margin: 0 auto;
+    padding: 0;
+    width: 90%;
+    line-height: 20px;
+    color: red;
+  }
+
+  button {
+    display: block;
+    margin: 20px auto 0;
+  }
+
+  a {
+    color: $purple;
+  }
+
+  .gender-area {
+    width: 90%;
+    margin: 0 auto 10px;
+
+    label,
+    input {
+      display: inline-block;
+      height: auto;
+      width: auto;
+      margin-bottom: 0;
+    }
+  }
+
+  button {
+    margin: 0 auto;
+  }
+}
