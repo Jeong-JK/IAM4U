@@ -23,6 +23,8 @@ jobs:
 
     - name: Log in to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v1
+      with:
+        region: ap-northeast-2  # ✅ 요 줄이 필요함!
 
     - name: Build, tag, and push Docker image to ECR
       run: |
