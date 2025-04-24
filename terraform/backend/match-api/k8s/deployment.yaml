@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: match-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: match-api
+  template:
+    metadata:
+      labels:
+        app: match-api
+    spec:
+      containers:
+        - name: match-api
+          image: 113701560990.dkr.ecr.ap-northeast-2.amazonaws.com/match-backend:latest
+          ports:
+            - containerPort: 80  # ✅ 포트 통일
+          env:
+            - name: AURORA_ENDPOINT
+              value: "datingapp-cluster-instance-1.c3wsqyy20d57.ap-northeast-2.rds.amazonaws.com"
+            - name: REDIS_ENDPOINT
+              value: "match-redis.y1lwij.0001.apn2.cache.amazonaws.com"
+            - name: DB_USER
+              value: "admin"
+            - name: DB_PASSWORD
+              value: "supersecure123"
+            - name: DB_NAME
+              value: "datingapp"
+            - name: SNS_TOPIC_ARN
+              value: "arn:aws:sns:ap-northeast-2:113701560990:match-success-topic"
+            - name: AWS_REGION
+              value: "ap-northeast-2"
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
