@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/Jeong-JK/IAM4U.git
     targetRevision: main
-    path: backend/match-api/k8s
+    path: terraform/backend/match-api/k8s
   destination:
     server: https://kubernetes.default.svc
     namespace: default
