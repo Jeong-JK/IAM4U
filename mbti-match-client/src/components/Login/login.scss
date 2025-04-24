@@ -1,0 +1,26 @@
+@import '../../utility/scss/variables';
+@import '../../utility/scss/form';
+
+.loginForm {
+  background: $yellow;
+  height: 50%;
+  position: relative;
+  padding-top: 40px;
+
+  button {
+    margin-left: 5%;
+    float: left;
+  }
+
+  a.button {
+    margin-right: 5%;
+    float: right;
+  }
+
+  .errors {
+    position: absolute;
+    top: 0;
+    left: 5%;
+    transform: translateY(-50%);
+  }
+}
