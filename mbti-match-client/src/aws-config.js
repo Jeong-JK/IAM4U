@@ -1,8 +1,8 @@
 const awsconfig = {
   Auth: {
     region: 'ap-northeast-2',
-    userPoolId: 'ap-northeast-2_zNz0cuK0c',
-    userPoolWebClientId: '7arvu987ihdqofl4ob3cldcrvb',
+    userPoolId: 'ap-northeast-2_he0NwXfAK',
+    userPoolWebClientId: 'r8ro24j5m9ggjdlq3rvkunsfn',
     mandatorySignIn: false,
     authenticationFlowType: 'USER_PASSWORD_AUTH',
   },

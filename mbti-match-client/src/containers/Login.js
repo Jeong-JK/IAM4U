@@ -17,6 +17,7 @@ import { Amplify } from 'aws-amplify';
 
 Amplify.configure(awsconfig);
 
+const API_URL = 'https://jxsbyfmks7.execute-api.ap-northeast-2.amazonaws.com/prod';
 
 const Login = () => {
   const [error, setError] = useState('');
@@ -32,8 +33,8 @@ const Login = () => {
     const getPosition = () => {
       return new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject);
-      },
-      <button onClick={handleLoginSuccess}>로그인</button>);
+      });
+      // <button onClick={handleLoginSuccess}>로그인</button>);
     };
 
     getPosition()
@@ -46,7 +47,7 @@ const Login = () => {
           })
         );
       })
-      .catch(error => {
+      .catch(() => {
         setError('현재 위치를 받아올 수 없습니다.');
       });
   }, [dispatch]);
@@ -66,33 +67,50 @@ const Login = () => {
     try {
       // ✅ Cognito 로그인
       const user = await Auth.signIn(login.email, login.password);
-      const jwt = user.signInUserSession.idToken.jwtToken;
+      const idToken = user.signInUserSession.idToken.jwtToken;
   
       // ✅ JWT 저장
-      localStorage.setItem('jwt', jwt);
+      sessionStorage.setItem('jwt', idToken);
   
       // ✅ 백엔드에서 유저 정보 요청 (API Gateway + Lambda)
-      const res = await fetch('https://wfqynf004c.execute-api.ap-northeast-2.amazonaws.com/prod/auth/user', {
+      const res = await fetch(`${API_URL}/auth/user`, {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${jwt}`,
+          Authorization: `Bearer ${idToken}`,
         },
       });
   
-      const data = await res.json();
-      console.log('✅ 유저 정보:', data);
-  
-      // ✅ Redux 저장
-      dispatch(successUserAuthentication(objectKeysToCamelCase(data.user)));
-  
-      // ✅ 이동
-      navigate('/profile');
-  
+      if (res.ok) {
+        const data = await res.json();
+        console.log('✅ 유저 정보:', data);
+      
+        if (data && data.user) {
+          dispatch(successUserAuthentication(objectKeysToCamelCase(data.user)));
+          navigate('/profile');
+        } else {
+          setError('유저 정보를 불러오지 못했습니다.');
+        }
+      } else {
+        // 서버 에러일 때 안전하게 처리
+        let errorMsg = '서버 오류가 발생했습니다.';
+        try {
+          const errorData = await res.json();
+          errorMsg = errorData.message || errorMsg;
+        } catch (parseErr) {
+          console.error('에러 메시지 파싱 실패:', parseErr);
+        }
+        setError(errorMsg);
+      }
     } catch (err) {
-      console.error('로그인 실패:', err);
-      setError('로그인에 실패했습니다.');
-    }
-  };
+      console.error('API 호출 실패:', err);
+      if (err.name === 'UserNotConfirmedException') {
+        setError('이메일 인증이 필요합니다.');
+      } else if (err.name === 'NotAuthorizedException') {
+        setError('아이디 또는 비밀번호가 잘못되었습니다.');
+      } else {
+        setError('로그인 중 오류가 발생했습니다.');
+      }
+    }};
 
   return (
     <>

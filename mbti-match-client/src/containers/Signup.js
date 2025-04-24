@@ -153,8 +153,10 @@ const Signup = () => {
   };
 
   const onFileChange = ev => {
-    setFile(ev.target.files[0]);
+    const selectedFile = ev.target.files[0];
+    dispatch(changeRegisterForm({ name: 'file', value: selectedFile }));
   };
+  
 
   const onSubmit = async ev => {
     ev.preventDefault();

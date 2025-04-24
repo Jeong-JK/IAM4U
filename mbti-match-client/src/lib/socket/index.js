@@ -5,7 +5,12 @@ import { config } from '../../config';
 const { SOCKET_ROOT } = config;
 
 export default function() {
-  const socket = io.connect(SOCKET_ROOT);
+  // const socket = io.connect(SOCKET_ROOT);
+  const socket = io('wss://datingapp.store', {
+    path: '/socket.io/',
+    transports: ['websocket'],
+    secure: true
+  });
 
   socket.on(ERROR, function(err) {
     console.log(err);
