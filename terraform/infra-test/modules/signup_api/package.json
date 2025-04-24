@@ -1,9 +1,0 @@
-{
-    "name": "signup-handler",
-    "version": "1.0.0",
-    "description": "Lambda function for user signup (S3 + Aurora)",
-    "main": "index.js",
-    "dependencies": {
-      "mysql2": "^3.9.2"
-    }
-  }
