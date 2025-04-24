@@ -1,0 +1,10 @@
+{
+    "name": "lambda-match-request",
+    "version": "1.0.0",
+    "description": "Lambda for match request",
+    "main": "index.js",
+    "dependencies": {
+      "aws-sdk": "^2.1370.0"
+    }
+  }
+  
