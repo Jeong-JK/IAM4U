@@ -28,7 +28,7 @@ resource "aws_rds_cluster" "this" {
 resource "aws_rds_cluster_instance" "this" {
   identifier         = "datingapp-cluster-instance-1"
   cluster_identifier = aws_rds_cluster.this.id
-  instance_class     = "db.t3.medium" # ✅ 변경 가능 (요금/성능에 따라)
+  instance_class     = "db.t3.micro" # ✅ 변경 가능 (요금/성능에 따라)
   engine             = aws_rds_cluster.this.engine
   engine_version     = aws_rds_cluster.this.engine_version
   publicly_accessible = true
