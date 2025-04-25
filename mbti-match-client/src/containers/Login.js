@@ -70,13 +70,19 @@ const Login = () => {
       const idToken = user.signInUserSession.idToken.jwtToken;
   
       // ✅ JWT 저장
-      sessionStorage.setItem('jwt', idToken);
+      localStorage.setItem('jwt', idToken);
   
       // ✅ 백엔드에서 유저 정보 요청 (API Gateway + Lambda)
+      const token = localStorage.getItem('jwt');
+      if (!token) {
+        setError('로그인 세션이 유효하지 않습니다. 다시 로그인 해주세요.');
+        return;
+      }
+      
       const res = await fetch(`${API_URL}/auth/user`, {
         method: 'GET',
         headers: {
-          Authorization: `Bearer ${idToken}`,
+          Authorization: `Bearer ${token}`,
         },
       });
   

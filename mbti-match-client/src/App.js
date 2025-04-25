@@ -108,7 +108,6 @@ import ChatList from './containers/ChatList';
 import ChatView from './containers/ChatView';
 import NotFound from './containers/NotFound';
 import MainLoading from './containers/MainLoading';
-import EmailVerification from './containers/EmailVerification';
 
 
 
@@ -126,7 +125,6 @@ const NotLoggedInRoute = ({ children }) => {
 
 const App = () => {
   const dispatch = useDispatch();
-  const location = useLocation();
   const { isMainLoading } = useSelector(state => ({
     isMainLoading: state.isMainLoading
   }));
@@ -170,7 +168,6 @@ const App = () => {
               <Route path="/chat/room/:roomId" element={
                 <PrivateRoute><ChatView /></PrivateRoute>
               } />
-              <Route path="/verify-email" element={<EmailVerification />} />
 
 
 

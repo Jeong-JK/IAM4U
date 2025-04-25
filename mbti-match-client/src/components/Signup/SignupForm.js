@@ -6,7 +6,7 @@ import { Auth } from 'aws-amplify';
 const ROOT = 'https://jxsbyfmks7.execute-api.ap-northeast-2.amazonaws.com/prod';
 
 
-const SignupForm = ({ onSubmit, onChange, register, error, onFileChange }) => {
+const SignupForm = ({ onChange, register, error, onFileChange, isSignupComplete, code, setCode, handleConfirmCode, handleResendCode}) => {
   let form = null;
 
   useEffect(() => {
@@ -16,12 +16,19 @@ const SignupForm = ({ onSubmit, onChange, register, error, onFileChange }) => {
 
     scrollToTop();
   }, [error, form]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await handleSignUp(register);
+  };
+
   return (
     <div className="signupForm form">
-      <form onSubmit={(e) => {
-        e.preventDefault();
-        handleSignUp(register, register.file);  // 선택된 파일 넘기기
-      }} ref={le => (form = le)}>
+      {!isSignupComplete ? (
+      <form onSubmit={handleSubmit}
+        // e.preventDefault();
+        // handleSignUp(register, register.file);  // 선택된 파일 넘기기
+      ref={le => (form = le)}>
         <p className="error">{error}</p>
         <label htmlFor="mbit" required>
           MBTI
@@ -137,17 +144,44 @@ const SignupForm = ({ onSubmit, onChange, register, error, onFileChange }) => {
         />
         <button>Sign up</button>
       </form>
+      ) : (
+        // ✅ 인증 코드 입력 UI
+        <div className="verify-section">
+          <h3>이메일 인증</h3>
+          <p>이메일로 전송된 인증 코드를 입력하세요.</p>
+          <input
+            type="text"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="인증 코드 입력"
+          />
+          <button onClick={handleConfirmCode}>인증 확인</button>
+          <button onClick={handleResendCode}>인증 코드 재전송</button>
+          {error && <p className="error">{error}</p>}
+        </div>
+      )}
     </div>
   );
 };
 
-const handleSignUp = async (register, file) => {
+export const handleSignUp = async (register) => {
   try {
+    const file = register.file;
+    if (!file) {
+      alert('파일이 선택되지 않았습니다.');
+      return;
+    }
+
     // 1️⃣ Presigned URL 요청
-    const presignedRes = await axios.put(`${ROOT}/api/upload`, {
+    const presignedRes = await axios.post(`${ROOT}/api/upload`, {
       fileName: file.name,
       fileType: file.type
-    });
+    },
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+
     const { uploadURL, key } = presignedRes.data;
 
     // 2️⃣ S3로 파일 업로드
@@ -171,7 +205,7 @@ const handleSignUp = async (register, file) => {
       profileImage: key
     });
 
-    alert('가입 성공!');
+    alert('가입 성공! 이메일 인증 코드를 입력하세요.');
   } catch (error) {
     console.error('회원가입 에러:', error);
  

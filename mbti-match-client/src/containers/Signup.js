@@ -118,10 +118,13 @@ import BackTab from '../components/BackTab/BackTab';
 import { changeRegisterForm, getGeolocation, registerMember } from '../actions';
 import { objectKeysToCamelCase } from '../utility/formattingData';
 import { postSignup } from '../api';
+import { Auth } from 'aws-amplify';
 
 const Signup = () => {
   const [error, setError] = useState('');
   const [file, setFile] = useState(null);
+  const [code, setCode] = useState('');
+  const [isSignupComplete, setIsSignupComplete] = useState(false);
   const register = useSelector(state => state.register);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -196,15 +199,26 @@ const Signup = () => {
     await dispatch(registerMember(objectKeysToCamelCase(result.data)));
   
       // ✅ 회원가입 성공 시 이메일 인증 페이지로 이동
-    console.log('[DEBUG] navigate 전달 email:', register.email);
-    alert('회원가입 성공! 이메일 인증 페이지로 이동합니다.');
-    navigate('/verify-email', { state: { email: register.email } });
+    alert('회원가입 성공! 이메일로 전송된 인증 코드를 입력해주세요.');
+    setIsSignupComplete(true);
   
     } catch (err) {
       console.error('회원가입 오류:', err);
       setError('회원가입 중 오류가 발생했습니다.');
     }
   }
+
+  // ✅ 인증 코드 확인 핸들러
+  const handleConfirmCode = async () => {
+    try {
+      await Auth.confirmSignUp(register.email, code);
+      alert('✅ 이메일 인증이 완료되었습니다!');
+      navigate('/login');
+    } catch (err) {
+      console.error('인증 실패:', err);
+      setError('❌ 인증번호가 잘못되었거나 만료되었습니다.');
+    }
+  };
   
 
   return (
@@ -216,7 +230,33 @@ const Signup = () => {
         onFileChange={onFileChange}
         onSubmit={onSubmit}
         error={error}
+        isSignupComplete={isSignupComplete}   // ✅ 추가
+        code={code}                           // ✅ 추가
+        setCode={setCode}                     // ✅ 추가
+        handleConfirmCode={handleConfirmCode} // ✅ 추가
+        handleResendCode={async () => {       // ✅ 재전송 핸들러
+          try {
+            await Auth.resendSignUp(register.email);
+            alert('📧 인증번호가 다시 전송되었습니다.');
+          } catch (err) {
+            console.error('재전송 실패:', err);
+            setError('인증번호 재전송 중 오류 발생.');
+          }
+        }}
       />
+
+    {isSignupComplete && (
+        <div style={{ padding: '20px' }}>
+          <h3>이메일로 받은 인증 코드를 입력하세요</h3>
+          <input
+            type="text"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            placeholder="인증 코드 입력"
+          />
+          <button onClick={handleConfirmCode}>인증 완료</button>
+        </div>
+      )}
     </>
   );
 };

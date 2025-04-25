@@ -11,7 +11,7 @@ export const postSignup = (formData, registerData) => {
     })
     .then(response => {
       return axios
-        .put(`${ROOT}/api/upload`, formData)
+        .post(`${ROOT}/api/upload`, formData)
         .then(result => {
           return {
             data: result.data,
