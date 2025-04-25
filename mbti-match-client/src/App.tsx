@@ -85,6 +85,7 @@ import Edit from './containers/Edit';
 import ChatList from './containers/ChatList';
 import ChatView from './containers/ChatView';
 import NotFound from './containers/NotFound';
+import EmailVerification from './containers/EmailVerification';
 
 // ✅ 공통 props 타입 정의
 interface AuthRouteProps {
@@ -174,6 +175,7 @@ const App = () => {
             </PrivateRoute>
           }
         />
+        <Route path="/verify-email" element={<EmailVerification />} />
 
         {/* 404 처리 */}
         <Route path="*" element={<NotFound />} />

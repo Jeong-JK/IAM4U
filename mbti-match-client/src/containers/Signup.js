@@ -179,7 +179,7 @@ const Signup = () => {
       dispatch(changeRegisterForm({ key: 'passwordConfirm', value: '' }));
       return;
     }
-
+    
     const formData = new FormData();
     formData.append('file', file);
     formData.append('email', register.email);
@@ -188,14 +188,24 @@ const Signup = () => {
     formData.append('mbti', register.mbti);
     formData.append('gender', register.gender);
 
-    const result = await postSignup(formData, register);
+    try {
+      const result = await postSignup(formData, register);
 
     console.log('[DEBUG] postSignup result.data:', result.data); // ✅ 확인용
 
-    dispatch(registerMember(objectKeysToCamelCase(result.data)));
-
-    // navigate('/profile');
-  };
+    await dispatch(registerMember(objectKeysToCamelCase(result.data)));
+  
+      // ✅ 회원가입 성공 시 이메일 인증 페이지로 이동
+    console.log('[DEBUG] navigate 전달 email:', register.email);
+    alert('회원가입 성공! 이메일 인증 페이지로 이동합니다.');
+    navigate('/verify-email', { state: { email: register.email } });
+  
+    } catch (err) {
+      console.error('회원가입 오류:', err);
+      setError('회원가입 중 오류가 발생했습니다.');
+    }
+  }
+  
 
   return (
     <>

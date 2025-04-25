@@ -92,6 +92,7 @@ const Login = () => {
         }
       } else {
         // 서버 에러일 때 안전하게 처리
+        console.error(`❌ 서버 오류 [${res.status}]`);
         let errorMsg = '서버 오류가 발생했습니다.';
         try {
           const errorData = await res.json();

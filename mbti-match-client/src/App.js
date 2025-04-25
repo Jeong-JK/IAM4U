@@ -93,7 +93,7 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation,
+  useLocation
 } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
@@ -108,6 +108,8 @@ import ChatList from './containers/ChatList';
 import ChatView from './containers/ChatView';
 import NotFound from './containers/NotFound';
 import MainLoading from './containers/MainLoading';
+import EmailVerification from './containers/EmailVerification';
+
 
 
 // ✅ 로그인 여부 판단용 커스텀 라우터
@@ -124,6 +126,7 @@ const NotLoggedInRoute = ({ children }) => {
 
 const App = () => {
   const dispatch = useDispatch();
+  const location = useLocation();
   const { isMainLoading } = useSelector(state => ({
     isMainLoading: state.isMainLoading
   }));
@@ -167,6 +170,9 @@ const App = () => {
               <Route path="/chat/room/:roomId" element={
                 <PrivateRoute><ChatView /></PrivateRoute>
               } />
+              <Route path="/verify-email" element={<EmailVerification />} />
+
+
 
               {/* 404 */}
               <Route path="*" element={<NotFound />} />
