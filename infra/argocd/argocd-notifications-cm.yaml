@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+data:
+  service.slack: |
+    webhook: https://hooks.slack.com/services/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
+  providers: |
+    slack:
+      service: slack
+  templates: |
+    - name: app-sync-succeeded
+      title: "Application {{.app.metadata.name}} sync succeeded"
+      slack:
+        attachments:
+        - color: "#18be52"
+          title: "✅ Application {{.app.metadata.name}} sync succeeded!"
+          text: |
+            *Sync completed successfully!*
+  triggers: |
+    - name: on-sync-succeeded
+      condition: app.status.operationState.phase == 'Succeeded'
+      template: app-sync-succeeded
+  subscriptions: |
+    - recipients:
+        - slack
+      triggers:
+        - on-sync-succeeded
