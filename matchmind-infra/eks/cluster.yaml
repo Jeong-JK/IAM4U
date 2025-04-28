@@ -1,0 +1,26 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: matchmind-cluster
+  region: ap-northeast-2
+  version: "1.29"
+
+vpc:
+  id: "vpc-0d13bf92478393fe6"
+  subnets:
+    public:
+      ap-northeast-2a:
+        id: "subnet-02271be938bd0672a"  # 정확한 서브넷
+      ap-northeast-2c:
+        id: "subnet-0f66e56139bb3a191"
+
+nodeGroups:
+  - name: matchmind-ng
+    instanceType: t3.small
+    desiredCapacity: 2
+    minSize: 1
+    maxSize: 3
+    volumeSize: 20
+    ssh:
+      allow: true

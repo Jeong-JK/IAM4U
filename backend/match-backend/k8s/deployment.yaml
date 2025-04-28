@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: match-backend
+  labels:
+    app: match-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: match-backend
+  template:
+    metadata:
+      labels:
+        app: match-backend
+    spec:
+      containers:
+      - name: match-backend
+        image: nginx:latest  # (지금은 nginx 테스트용으로 올리자)
+        ports:
+        - containerPort: 80
