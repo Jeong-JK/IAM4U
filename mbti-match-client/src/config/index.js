@@ -5,7 +5,7 @@ if (process.env.NODE_ENV === 'development') {
   SOCKET_ROOT = 'http://localhost:8081';
 } else {
   ROOT = 'https://jxsbyfmks7.execute-api.ap-northeast-2.amazonaws.com/prod';
-  SOCKET_ROOT = 'http://3.38.152.226:8080';
+  SOCKET_ROOT = 'http://43.203.217.7:8080';
 }
 
 export const config = Object.freeze({

@@ -1,33 +1,19 @@
 import React, { useEffect } from 'react';
-import axios from 'axios';
 import './SignupForm.scss';
-import { Auth } from 'aws-amplify';
 
-const ROOT = 'https://jxsbyfmks7.execute-api.ap-northeast-2.amazonaws.com/prod';
-
-
-const SignupForm = ({ onChange, register, error, onFileChange, isSignupComplete, code, setCode, handleConfirmCode, handleResendCode}) => {
+const SignupForm = ({ onSubmit, onChange, register, error, onFileChange, isSignupComplete, code, setCode, handleConfirmCode, handleResendCode}) => {
   let form = null;
 
   useEffect(() => {
-    const scrollToTop = () => {
+    if (form) {
       form.scrollIntoView({ block: 'start' });
-    };
-
-    scrollToTop();
-  }, [error, form]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    await handleSignUp(register);
-  };
+    }
+  }, [error]);
 
   return (
     <div className="signupForm form">
       {!isSignupComplete ? (
-      <form onSubmit={handleSubmit}
-        // e.preventDefault();
-        // handleSignUp(register, register.file);  // 선택된 파일 넘기기
+      <form onSubmit={onSubmit}
       ref={le => (form = le)}>
         <p className="error">{error}</p>
         <label htmlFor="mbit" required>
@@ -164,59 +150,4 @@ const SignupForm = ({ onChange, register, error, onFileChange, isSignupComplete,
   );
 };
 
-export const handleSignUp = async (register) => {
-  try {
-    const file = register.file;
-    if (!file) {
-      alert('파일이 선택되지 않았습니다.');
-      return;
-    }
-
-    // 1️⃣ Presigned URL 요청
-    const presignedRes = await axios.post(`${ROOT}/api/upload`, {
-      fileName: file.name,
-      fileType: file.type
-    },
-      {
-        headers: { 'Content-Type': 'application/json' }
-      }
-    );
-
-    const { uploadURL, key } = presignedRes.data;
-
-    // 2️⃣ S3로 파일 업로드
-    await axios.put(uploadURL, file, {
-      headers: { 'Content-Type': file.type }
-    });
-
-    console.log('✅ 파일 업로드 성공:', key);
-
-    // 3️⃣ Cognito 회원가입
-    const { email, password } = register;
-    await Auth.signUp({
-      username: email,
-      password,
-      attributes: { email },
-    });
-
-    // 4️⃣ 추가 서버 회원가입 API 호출 (있다면)
-    await axios.post(`${ROOT}/api/signup`, {
-      ...register,
-      profileImage: key
-    });
-
-    alert('가입 성공! 이메일 인증 코드를 입력하세요.');
-  } catch (error) {
-    console.error('회원가입 에러:', error);
- 
-    if (error.response) {
-       console.error('서버 응답 에러:', error.response.data);
-    } else if (error.message) {
-       console.error('에러 메시지:', error.message);
-    }
- 
-    alert('가입 실패!');
- }
- 
-};
 export default SignupForm;
