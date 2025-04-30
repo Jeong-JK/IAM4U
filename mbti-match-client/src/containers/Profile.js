@@ -11,6 +11,7 @@ const Profile = () => {
   const { user } = useSelector(state => ({
     user: state.user
   }));
+  // console.log(user?.type);
 
   const onLogoutClick = async () => {
     getLogout().then(response => {
@@ -23,7 +24,7 @@ const Profile = () => {
     if (!token) return alert('로그인이 필요합니다.');
   
     try {
-      const res = await fetch('https://wfqynf004c.execute-api.ap-northeast-2.amazonaws.com/prod/user', {
+      const res = await fetch('https://jxsbyfmks7.execute-api.ap-northeast-2.amazonaws.com/prod/auth/user', {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,

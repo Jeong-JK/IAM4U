@@ -45,7 +45,15 @@ const Signup = () => {
   const onSubmit = async ev => {
     ev.preventDefault();
     const passwordReg = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,18}$/;
-    const { email, password, passwordConfirm, name, mbti, gender, file } = register;
+    const {
+      email = '',
+      password = '',
+      passwordConfirm = '',
+      name = '',
+      mbti = '',
+      gender = '',
+      file = null
+    } = register || {};
 
     if ([email, password, passwordConfirm, name, mbti, gender].includes('')) {
       setError('모두 입력하세요.');
@@ -71,29 +79,78 @@ const Signup = () => {
       const { uploadURL, key } = presignedRes.data;
       await axios.put(uploadURL, file, { headers: { 'Content-Type': file.type } });
 
-      await Auth.signUp({ username: email, password, attributes: { email } });
+      // await Auth.signUp({
+      //   username: email,
+      //   password: password,
+      //   attributes: {
+      //     email: email,
+      //     // name: name,
+      //     // gender: gender,
+      //     // mbti: mbti
+      //   }
+      // });
 
-      await axios.post(`${ROOT}/api/signup`, { email, password, name, mbti, gender, profileImage: key });
-
-      alert('가입 성공! 이메일 인증 코드를 입력하세요.');
-      setIsSignupComplete(true);
-
+ // 3. Lambda API를 통해 Cognito + DynamoDB 임시 저장 처리
+      // const signupRes = await axios.post(`${ROOT}/api/signup`, {
+      //   email, password, name, mbti, gender, profileImage: key
+      // }, {
+      //   headers: { 'Content-Type': 'application/json' }
+      // });
+      const signupRes = await axios.post(`${ROOT}/api/signup`, JSON.stringify({
+        email, password, name, mbti, gender, profileImage: key
+      }), {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (signupRes.status === 200) {
+        alert('가입 성공! 이메일 인증 코드를 입력하세요.');
+        setIsSignupComplete(true);
+      }
+      
     } catch (error) {
-      console.error('회원가입 에러:', error);
-      setError('회원가입 중 오류 발생!');
+      console.error('회원가입 에러:', error.response && error.response.data ? error.response.data : error);
+      setError(
+      error.response && error.response.data && error.response.data.message
+          ? error.response.data.message
+          : '회원가입 중 오류 발생!');
     }
   };
+
+  // const handleConfirmCode = async () => {
+  //   try {
+  //     const email = (register && register.email) || '';
+  //     const res = await axios.post(`${ROOT}/api/confirm`, { email, code });
+  //     if (res.status === 200) {
+  //       alert('✅ 이메일 인증이 완료되었습니다!');
+  //       navigate('/login');
+  //     }
+  //   } catch (err) {
+  //     console.error('인증 실패:', err);
+  //     setError('❌ 인증번호가 잘못되었거나 만료되었습니다.');
+  //   }
+  // };
 
   const handleConfirmCode = async () => {
     try {
-      await Auth.confirmSignUp(register.email, code);
-      alert('✅ 이메일 인증이 완료되었습니다!');
+      const email = (register && register.email) || '';
+      await Auth.confirmSignUp(email, code);
+  
+      alert('✅ 인증이 완료되었습니다. 로그인하세요!');
       navigate('/login');
     } catch (err) {
       console.error('인증 실패:', err);
-      setError('❌ 인증번호가 잘못되었거나 만료되었습니다.');
+      if (
+        err.code === 'NotAuthorizedException' &&
+        err.message.includes('CONFIRMED')
+      ) {
+        alert('이미 인증된 계정입니다. 로그인 페이지로 이동합니다.');
+        navigate('/login');
+      } else {
+        setError('❌ 인증번호가 잘못되었거나 만료되었습니다.');
+      }
     }
   };
+  
 
   return (
     <>
@@ -108,15 +165,18 @@ const Signup = () => {
         code={code}
         setCode={setCode}
         handleConfirmCode={handleConfirmCode}
-        handleResendCode={async () => {
-          try {
-            await Auth.resendSignUp(register.email);
-            alert('📧 인증번호가 다시 전송되었습니다.');
-          } catch (err) {
-            console.error('재전송 실패:', err);
-            setError('인증번호 재전송 중 오류 발생.');
-          }
-        }}
+        handleResendCode={() => {}}
+        // handleResendCode={async () => {
+        //   try {
+        //     await axios.post(`${ROOT}/api/resend`, {
+        //       email: register && register.email
+        //     });
+        //     alert('📧 인증번호가 다시 전송되었습니다.');
+        //   } catch (err) {
+        //     console.error('재전송 실패:', err);
+        //     setError('인증번호 재전송 중 오류 발생.');
+        //   }
+        // }}
       />
     </>
   );

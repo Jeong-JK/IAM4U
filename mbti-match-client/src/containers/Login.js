@@ -83,15 +83,18 @@ const Login = () => {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
+        credentials: 'include'
       });
   
       if (res.ok) {
         const data = await res.json();
         console.log('✅ 유저 정보:', data);
       
-        if (data && data.user) {
-          dispatch(successUserAuthentication(objectKeysToCamelCase(data.user)));
+        if (data && typeof data.user === 'object' && data.user !== null) {
+          const safeUser = objectKeysToCamelCase(data.user);
+          dispatch(successUserAuthentication(safeUser));
           navigate('/profile');
         } else {
           setError('유저 정보를 불러오지 못했습니다.');
