@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: match-backend
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Jeong-JK/IAM4U.git
+    targetRevision: main
+    path: backend/match-backend/k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true

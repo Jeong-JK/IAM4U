@@ -1,0 +1,19 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: matchmind-production
+  region: ap-northeast-2
+  version: "1.29"
+
+vpc:
+  cidr: "10.0.0.0/16"
+
+nodeGroups:
+  - name: ng-app
+    instanceType: t3.medium
+    desiredCapacity: 2
+    minSize: 1
+    maxSize: 3
+    ssh:
+      allow: true

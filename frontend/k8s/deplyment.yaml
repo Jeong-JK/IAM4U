@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matchmind-frontend
+  labels:
+    app: matchmind-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: matchmind-frontend
+  template:
+    metadata:
+      labels:
+        app: matchmind-frontend
+    spec:
+      containers:
+      - name: matchmind-frontend
+        image: 113701560990.dkr.ecr.ap-northeast-2.amazonaws.com/matchmind-frontend:latest
+        ports:
+        - containerPort: 80

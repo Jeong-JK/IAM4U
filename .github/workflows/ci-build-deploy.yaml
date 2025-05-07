@@ -1,0 +1,47 @@
+name: CI - Build and Push to ECR
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/match-backend/**'
+      - 'backend/matching-api/**'
+      - 'frontend/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Match Backend Image
+        run: |
+          docker build -t matchmind-backend ./backend/match-backend
+          docker tag matchmind-backend 113701560990.dkr.ecr.ap-northeast-2.amazonaws.com/matchmind-backend:latest
+          docker push 113701560990.dkr.ecr.ap-northeast-2.amazonaws.com/matchmind-backend:latest
+      
+      - name: Build Matching API Image
+        run: |
+          docker build -t matching-api ./backend/matching-api
+          docker tag matching-api 113701560990.dkr.ecr.ap-northeast-2.amazonaws.com/matching-api:latest
+          docker push 113701560990.dkr.ecr.ap-northeast-2.amazonaws.com/matching-api:latest
+      
+      - name: Build Frontend Image
+        run: |
+          docker build -t matchmind-frontend ./frontend/app
+          docker tag matchmind-frontend 113701560990.dkr.ecr.ap-northeast-2.amazonaws.com/matchmind-frontend:latest
+          docker push 113701560990.dkr.ecr.ap-northeast-2.amazonaws.com/matchmind-frontend:latest
+      

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: match-backend
+  labels:
+    app: match-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: match-backend
+  template:
+    metadata:
+      labels:
+        app: match-backend
+    spec:
+      containers:
+      - name: match-backend
+        image: 113701560990.dkr.ecr.ap-northeast-2.amazonaws.com/matchmind-backend:latest
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
